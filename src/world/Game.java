@@ -136,7 +136,7 @@ public class Game {
 
         //this.verApuestas();
         this.reverlarCarta();
-        
+
         //
         this.initGame();
 
@@ -152,12 +152,20 @@ public class Game {
     public void initGame() {
         for (int i = 0; i < players.size(); i++) {
             Player jugadorF = (Player) players.get(i);
+            if (i == 3) {
+                this.crupierRevelaSusCartas(i);
+                this.crupierDecide(i);
+                
+                this.compararCartas();
+            } else {
+                while (this.puedeJugar(jugadorF)) {
 
-            while (this.puedeJugar(jugadorF)) {
+                    this.crupierPregunta(i);
 
-                this.crupierPregunta(i);
+                }
 
             }
+
         }
 
     }
@@ -186,6 +194,11 @@ public class Game {
         return canYouPlay;
     }
 
+    public void compararCartas() {
+        
+
+    }
+
     public void reverlarCarta() {
         this.mostrarCartasXJugador(0);
         this.mostrarCartasXJugador(1);
@@ -194,8 +207,8 @@ public class Game {
     }
 
     public void crupierPregunta(int x) {
-        Player jugadorPoint = (Player)players.get(x);
-        System.out.println("Porfavor digite su accion: "+jugadorPoint.getApodo());
+        Player jugadorPoint = (Player) players.get(x);
+        System.out.println("Porfavor digite su accion: " + jugadorPoint.getApodo());
         System.out.println("1: Pedir carta");
         System.out.println("2: Plantarse");
         System.out.println("3: Dividir baraja");
@@ -203,16 +216,24 @@ public class Game {
         System.out.println("5: Salir");
         System.out.print(">>");
 
-        
         Scanner input = new Scanner(System.in);
         String opcion = input.next();
 
         switch (opcion) {
-            case "1": this.pedir(x);break;
-            case "2": this.plantarse(x);break;
-            case "3": break;
-            case "4": break;
-            case "5": System.exit(0);break;
+            case "1":
+                this.pedir(x);
+                break;
+            case "2":
+                this.plantarse(x);
+                break;
+            case "3":
+                break;
+            case "4":
+                this.doblar(x);
+                break;
+            case "5":
+                System.exit(0);
+                break;
 
             default:
                 this.crupierPregunta(x);
@@ -220,7 +241,6 @@ public class Game {
         }
 
     }
-
 
     public void crearBaraja() {
         String[] letras = {"J", "Q", "K", "A"};
@@ -397,6 +417,67 @@ public class Game {
          */
     }
 
+    public void crupierDecide(int x) {
+        
+        Baraja cartas = (Baraja) ((Crupier) players.get(x)).getCartas();
+        Player crp = (Player)players.get(x);
+        
+        int[] sumas = cartas.getSumaBaraja();
+        System.out.println("Suma max:"+sumas[0]);
+        System.out.println("Suma min:"+sumas[1]);
+        
+        /* 
+        if (sumas[1] > 0) {
+
+        } else {
+            if (sumas[0] >= 17) {
+                this.plantarse(x);
+
+            } else if (sumas[0] <= 16) {
+
+                this.pedir(x);
+
+            }
+
+        }
+        
+         */
+        
+            if (sumas[0] == 21 || sumas[1] == 21) {
+                this.plantarse(x);
+            } else if( sumas[0] >= 17 || sumas[1] >= 17)
+            {
+                this.plantarse(x);
+            }else{
+                this.pedir(x);
+            }
+            
+            if(!(crp.isJugadorPlantado()))
+            {
+                this.crupierDecide(x);
+            }
+            
+
+        
+        
+        
+        
+        
+
+    }
+
+    public void crupierRevelaSusCartas(int x) {
+        Baraja cartas = (Baraja) ((Crupier) players.get(x)).getCartas();
+
+        Carta carta = (Carta) cartas.get(0);
+        Carta carta2 = (Carta) cartas.get(1);
+
+        System.out.println("Cartas Crupier");
+        System.out.println("#1 Carta: " + carta.getCarta() + " Figura:" + carta.getFigura());
+        System.out.println("#2 Carta: " + carta2.getCarta() + " Figura:" + carta2.getFigura());
+  
+    }
+
     public void mostrarCartasXJugador(int x) {
 
         if (x < 4) {
@@ -425,12 +506,12 @@ public class Game {
     }
 
     public void pedir(int jugadorC) {
-        
+
         Carta nuevaCarta = (Carta) crupier.getBaraja().remove(0);
         Player jugador = (Player) players.get(jugadorC);
         ((Player) players.get(jugadorC)).recibirCarta(nuevaCarta);
-        System.out.println("Mas cartas para "+jugador.getApodo()+"!! ♦♣♠♥");
-        System.out.println("Carta:"+nuevaCarta.getCarta()+" Figura:"+nuevaCarta.getFigura()+" Color:"+nuevaCarta.getColor());
+        System.out.println("Mas cartas para " + jugador.getApodo() + "!! ♦♣♠♥");
+        System.out.println("Carta:" + nuevaCarta.getCarta() + " Figura:" + nuevaCarta.getFigura() + " Color:" + nuevaCarta.getColor());
     }
 
     public void plantarse(int jugadorAP) {
@@ -438,11 +519,24 @@ public class Game {
     }
 
     public void doblar(int jugadorDoblado) {
-        
-        Player jugadorD = (Player)players.get(jugadorDoblado);
-        int apuestaNueva = jugadorD.getApuesta() * 2;
-        System.out.println("Su apuesta se ha doblado a:"+apuestaNueva);
-        ((Player) players.get(0)).setApuesta(apuestaNueva);
+
+        if (jugadorDoblado != 3) {
+
+            Player jugadorD = (Player) players.get(jugadorDoblado);
+            //Se dobla la apuesta inicial
+            int apuestaNueva = jugadorD.getApuesta() * 2;
+            System.out.println("Su apuesta se dobla a:" + apuestaNueva);
+            ((Player) players.get(jugadorDoblado)).setApuesta(apuestaNueva);
+
+            //El crupier reparte una nueva carta al jugador que doblo
+            Carta nuevaCarta = (Carta) crupier.getBaraja().remove(0);
+            ((Player) players.get(jugadorDoblado)).recibirCarta(nuevaCarta);
+
+            System.out.println("Mas cartas para " + jugadorD.getApodo() + "!! ♦♣♠♥");
+            System.out.println("Carta:" + nuevaCarta.getCarta() + " Figura:" + nuevaCarta.getFigura() + " Color:" + nuevaCarta.getColor());
+
+        }
+
     }
 
     public String getTipoJuego() {

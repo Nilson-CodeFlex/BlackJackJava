@@ -30,6 +30,7 @@ public class Player {
     private boolean turno = false;
     
     private boolean isWon = false;
+    private boolean isEmpate = false;
     private boolean jugadorPlantado = false;
     private boolean jugando = true;
 
@@ -248,6 +249,16 @@ public class Player {
     public void setJugando(boolean jugando) {
         this.jugando = jugando;
     }
+
+    public boolean isIsEmpate() {
+        return isEmpate;
+    }
+
+    public void setIsEmpate(boolean isEmpate) {
+        this.isEmpate = isEmpate;
+    }
+    
+    
     
     
     
